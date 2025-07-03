@@ -1,0 +1,36 @@
+# Byte-compiled / optimized / C extensions
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.env
+venv/
+env/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+
+# Data files - Never commit data to Git!
+data/raw/
+data/processed/
+*.csv
+*.parquet
+
+# Model artifacts
+models/*.pkl
+reports/
+
+# Python notebooks
+.ipynb_checkpoints
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Airflow/Docker specific
+logs/
+plugins/
+docker-compose.yaml

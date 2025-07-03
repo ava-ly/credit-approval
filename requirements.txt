@@ -1,0 +1,14 @@
+# Data Manipulation and ML
+pandas
+scikit-learn
+pyspark
+
+# Testing
+pytest
+pytest-cov
+
+# Workflow Orchestration
+apache-airflow
+
+# Utilities
+python-dotenv
