@@ -13,7 +13,7 @@ def generate_target_variable(credit_df: DataFrame) -> DataFrame:
         credit_df: The Spark DataFrame containing credit record data.
 
     Returns:
-        A Spark DataFrame with two columns: 'ID' and 'risk_flag'.
+        A Spark DataFrame with two columns: 'ID' and 'Risk_Flag'.
     """
     # Define the statuses that indicate a high-risk payment
     high_risk_statuses = ['2', '3', '4', '5']
