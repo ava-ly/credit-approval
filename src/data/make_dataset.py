@@ -1,10 +1,10 @@
-from pyspark.sql import DataFrame, Window
+from pyspark.sql import DataFrame, SparkSession, Window
 from pyspark.sql import functions as F
 from pyspark.sql.types import StructType, StructField, IntegerType
 
-def generate_target_variable(credit_df: DataFrame) -> DataFrame:
+def generate_target_variable(spark: SparkSession, credit_df: DataFrame) -> DataFrame:
     """
-    Engineers the target variable 'risk_flag' from the credit record data
+    Engineers the target variable 'Risk_Flag' from the credit record data
 
     A client is flagged as high-risk (1) if they have ever had a payment
     that was 60 or more days overdue (status '2', '3', '4', '5').
@@ -45,7 +45,7 @@ def generate_target_variable(credit_df: DataFrame) -> DataFrame:
         StructField("Risk_Flag", IntegerType(), False)  # Risk_Flag cannot be null
     ])
 
-    final_df = intermediate_df.spark.createDataFrame(
+    final_df = spark.createDataFrame(
         intermediate_df.rdd,
         schema=final_schema
     )

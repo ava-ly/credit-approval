@@ -51,7 +51,7 @@ def test_target_variable_generation(spark):
     expected_df = spark.createDataFrame(data=expected_data, schema=expected_schema)
 
     # Call the function
-    actual_df = generate_target_variable(input_df)
+    actual_df = generate_target_variable(spark, input_df)
 
     # Assert that the actual output matches the expected output
     # Collecting data to compare them as lists of rows is easier than comparing DataFrames directly
