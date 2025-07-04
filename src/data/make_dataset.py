@@ -1,5 +1,6 @@
 from pyspark.sql import DataFrame, Window
 from pyspark.sql import functions as F
+from pyspark.sql.types import StructType, StructField, IntegerType
 
 def generate_target_variable(credit_df: DataFrame) -> DataFrame:
     """
@@ -37,11 +38,16 @@ def generate_target_variable(credit_df: DataFrame) -> DataFrame:
         F.max("is_high_risk_record").over(window_spec)
     )
 
-    # Select only the ID and the final flag and get distinct rows
-    # to have one record per client
-    final_df = df_with_risk_flag.select("ID", "Risk_Flag").distinct()
+    intermediate_df = df_with_risk_flag.select("ID", "Risk_Flag").distinct()
 
-    # Ensure risk_flag is not nullable as it's our target
-    final_df = final_df.withColumn("Risk_Flag", F.col("Risk_Flag").cast("integer"))
+    final_schema = StructType([
+        StructField("ID", IntegerType(), True),         # ID can be nullable
+        StructField("Risk_Flag", IntegerType(), False)  # Risk_Flag cannot be null
+    ])
+
+    final_df = intermediate_df.spark.createDataFrame(
+        intermediate_df.rdd,
+        schema=final_schema
+    )
 
     return final_df
