@@ -33,15 +33,15 @@ def generate_target_variable(credit_df: DataFrame) -> DataFrame:
     # If the maximum value of 'is_high_risk_record' for a client is 1,
     # it means they had at least 1 high-risk payment.
     df_with_risk_flag = df_with_risk_record.withColumn(
-        'risk_flag',
+        'Risk_Flag',
         F.max("is_high_risk_record").over(window_spec)
     )
 
     # Select only the ID and the final flag and get distinct rows
     # to have one record per client
-    final_df = df_with_risk_flag.select("ID", "risk_flag").distinct()
+    final_df = df_with_risk_flag.select("ID", "Risk_Flag").distinct()
 
     # Ensure risk_flag is not nullable as it's our target
-    final_df = final_df.withColumn("risk_flag", F.col("risk_flag").cast("integer"))
+    final_df = final_df.withColumn("Risk_Flag", F.col("Risk_Flag").cast("integer"))
 
     return final_df
