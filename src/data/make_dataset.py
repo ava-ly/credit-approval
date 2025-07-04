@@ -51,3 +51,57 @@ def generate_target_variable(spark: SparkSession, credit_df: DataFrame) -> DataF
     )
 
     return final_df
+
+def process_full_dataset(spark: SparkSession, app_df: DataFrame, credit_df: DataFrame) -> DataFrame:
+    """
+    Orchestrates the full data processing pipeline.
+
+    1. Generates the target variable from credit data
+    2. Joins the target variable with the application data.
+
+    Args:
+        spark: the active SparkSession.
+        app_df: DataFrame with application records.
+        credit_df: DataFrame with credit history records.
+
+    Returns:
+        A single, cleaned DataFrame ready for feature engineering.
+    """
+    # Step 1: Use the tested function to get the risk flag
+    target_df = generate_target_variable(spark, credit_df)
+
+    # Step 2: Join the application data with the risk flag
+    # Use inner join to keep only clients present in both datasets
+    processed_df = app_df.join(target_df, on="ID", how="inner")
+
+    return processed_df
+
+# This block allows the script to run from the command line
+if __name__ == '__main__':
+    # 1. Initialize Spark Session
+    spark = SparkSession.builder \
+        .appName("CreditApprovalDataProcessing") \
+        .getOrCreate()
+    
+    # 2. Define the file paths
+    APP_DATA_PATH = 'data/raw/application_record.csv'
+    CREDIT_DATA_PATH = 'data/raw/credit_record.csv'
+    OUTPUT_PATH = 'data/processed/primary_dataset'
+
+    # 3. Load the raw data
+    print('Loading raw data...')
+    application_df = spark.read.csv(APP_DATA_PATH, header=True, inferSchema=True)
+    credit_record_df = spark.read.csv(CREDIT_DATA_PATH, header=True, inferSchema=True)
+
+    # 4. Process the data using our functions
+    print('Processing full dataset...')
+    final_df = process_full_dataset(spark, application_df, credit_record_df)
+
+    # 5. Save the processed data as a Parquet file
+    print(f"Saving processed data to {OUTPUT_PATH}...")
+    final_df.write.mode("overwrite").parquet(OUTPUT_PATH)
+
+    print('Data processing complete.')
+
+    # 6. Stop the Spark Session
+    spark.stop()
