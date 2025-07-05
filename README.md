@@ -1,4 +1,5 @@
 # Credit Approval with Data Engineering & MLOps
+[![Python Project CI](https://github.com/ava-ly/credit-approval/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/ava-ly/credit-approval/actions/workflows/main.yml)
 
 ## Project Structure
 

@@ -33,8 +33,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Step 4: Run tests with pytest
+      # Step 4: Run tests and generate coverage report
       # This is the core of our CI. It runs all functions starting with 'test_' in the 'tests/' directory.
       - name: Run tests with pytest
         run: |
-          pytest
+          pytest --cov=src --cov-report=xml
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: true
