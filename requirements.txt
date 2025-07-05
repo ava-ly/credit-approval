@@ -1,7 +1,9 @@
 # Data Manipulation and ML
 pandas
+numpy
 scikit-learn
-pyspark
+pyspark==3.5.0
+py4j==0.10.9.7
 
 # Testing
 pytest
