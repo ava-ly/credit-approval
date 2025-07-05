@@ -1,5 +1,5 @@
 # Credit Approval with Data Engineering & MLOps
-[![Python Project CI](https://github.com/ava-ly/credit-approval/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/ava-ly/credit-approval/actions/workflows/main.yml)
+[![Python Project CI](https://github.com/ava-ly/credit-approval/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/ava-ly/credit-approval/actions/workflows/main.yml) [![codecov](https://codecov.io/github/ava-ly/credit-approval/graph/badge.svg?token=70U95XEZJ7)](https://codecov.io/github/ava-ly/credit-approval)
 
 ## Project Structure
 
