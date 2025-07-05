@@ -1,4 +1,4 @@
-# Predicting Credit Card Approval with Data Engineering & MLOps Mindset
+# Credit Approval with Data Engineering & MLOps
 
 ## Project Structure
 
