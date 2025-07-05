@@ -1,6 +1,6 @@
 # Credit Approval with Data Engineering & MLOps
 <!-- Badges Section -->
-<p align="left">
+<p>
   <a href="https://github.com/ava-ly/credit-approval/actions/workflows/main.yml">
     <img src="https://github.com/ava-ly/credit-approval/actions/workflows/main.yml/badge.svg" alt="Build Status">
   </a>
