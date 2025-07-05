@@ -43,7 +43,7 @@ credit-approval/
 ```
 
 
-## Phase 1: Environment & Pipeline Setup
+## Phase 1: Environment & Pipeline Setup ![icon-url]
 
 **Goal:** Establish the project foundation and CI pipeline.
 
@@ -66,7 +66,7 @@ credit-approval/
     - Install Airflow locally using Docker.
     - Ensure you can run a basic PySpark session.
 
-## Phase 2: Test-Driven Development (TDD) and Data Processing
+## Phase 2: Test-Driven Development (TDD) and Data Processing ![icon-url]
 
 **Goal:** Implement the data cleaning and feature engineering logic using TDD.
 
@@ -108,3 +108,4 @@ credit-approval/
 
 **Goal:** Integrate the model training into the pipeline and prepare for deployment.
 
+[icon-url]: https://github.com/ava-ly/credit-approval/blob/main/icon/ok-24.png?raw=true
