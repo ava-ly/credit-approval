@@ -2,11 +2,10 @@
 <!-- Badges Section -->
 <p>
   <a href="https://github.com/ava-ly/credit-approval/actions/workflows/main.yml">
-    <img src="https://github.com/ava-ly/credit-approval/actions/workflows/main.yml/badge.svg" alt="Build Status" />
+    <img src="https://github.com/ava-ly/credit-approval/actions/workflows/main.yml/badge.svg" alt="Build Status">
   </a>
-  
   <a href="https://codecov.io/gh/ava-ly/credit-approval">
-    <img src="https://codecov.io/github/ava-ly/credit-approval/graph/badge.svg?token=70U95XEZJ7" alt="Code Coverage" />
+    <img src="https://codecov.io/github/ava-ly/credit-approval/graph/badge.svg?token=70U95XEZJ7" alt="Code Coverage">
   </a>
 </p>
 
