@@ -1,0 +1,16 @@
+[tool.pytest.ini_options]
+# Tell pytest where to find the source code
+pythonpath = "."
+# Tell pytest which directories to ignore completely
+norecursedirs = ".git venv logs .github"
+
+[tool.coverage.run]
+# Tell coverage to measure the 'src' directory
+source = ["src"]
+
+[tool.coverage.report]
+# Tell coverage to ignore any line containing this specific text
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.:"
+]
