@@ -52,28 +52,15 @@ credit-approval/
 
 **Goal:** Establish the project foundation and CI pipeline.
 
-1. Project Scaffolding: Create the folder structure outlined above.
+- Project Scaffolding: Create the folder structure outlined above.
+- Version Control: Initialized a Git repository and configured a .gitignore file to exclude data, environment files, and other non-source assets.
+- Dependency Management: Set up a Python virtual environment (venv) and defined all project dependencies in requirements.txt.
+- CI/CD Pipeline: Implemented a Continuous Integration pipeline using GitHub Actions to automatically run tests and calculate code coverage on every push to the main branch.
+- Orchestration Setup: Deployed a local Apache Airflow instance using Docker and Docker Compose for development and testing of automated workflows.
 
-2. Environment Setup:
-    - Initialize a Git repository: `git init`.
-    - Create `requirements.txt` with `pandas`, `numpy`, `pyspark`, `scikit-learn`, `pytest`, `apache-airflow`.
-    - Set up a Python virtual environment and install dependencies.
+## Phase 2: Data Processing ![icon-url]
 
-3. Setup Initial CI Pipeline (GitHub Actions):
-    - In `.github/workflows/main.yml`, create a basic workflow that triggers on every `push`.
-    - This workflow should:
-        - Check out the code.
-        - Set up Python.
-        - Install dependencies from `requirements.txt`.
-        - Run `pytest`.
-    
-4. Setup Local Airflow & PySpark:
-    - Install Airflow locally using Docker.
-    - Ensure you can run a basic PySpark session.
-
-## Phase 2: Test-Driven Development (TDD) and Data Processing ![icon-url]
-
-**Goal:** Implement the data cleaning and feature engineering logic using TDD.
+**Goal:** Process the raw data and create a clean, unified primary dataset.
 
 1. Target Variable Engineering (TDD):
     - Write Test (`tests/data/test_make_dataset.py`): Create a small, sample PySpark DataFrame that mimics `credit_record.csv`. Write a test function `test_target_variable_creation` that asserts:
@@ -88,31 +75,40 @@ credit-approval/
     - Write Test: In the same test file, add a test for the main data processing function. It should check that the application and credit data are merged correctly and that known data anomalies (e.g., `DAYS_EMPLOYED`) are handled.
     - Write Code: Implement the logic in `src/data/make_dataset.py` to pass the test. This script will be the **1st major task** in our Airflow pipeline.
 
-3. Exploratory Data Analysis (Notebook):
-    - Create a new notebook (`notebooks/01_credit_risk_analysis.ipynb`)
-    - Load the Data: Use PySpark to read `../data/processed/primary_dataset`.
-    - Analyze Target Variable: Plot the distribution of `Risk_Flag`.
-    - Univariate Analysis: Explore single features.
-    - Bivariate Analysis: Explore the relationship between each feature and the `Risk_Flag`.
 
-4. Feature Engineering (TDD):
+## Phase 3: Exploratory Data Analysis (EDA) ![icon-url]
+
+**Goal:** Understand the processed data, identify patterns, discover relationships.
+
+- Create a new notebook (`notebooks/01_credit_risk_analysis.ipynb`)
+- Load the Data: Use PySpark to read `../data/processed/primary_dataset`.
+- Analyze Target Variable: Plot the distribution of `Risk_Flag`.
+- Univariate Analysis: Explore single features.
+- Bivariate Analysis: Explore the relationship between each feature and the `Risk_Flag`.
+
+
+## Phase 4: Feature Engineering & Model Prototyping ![icon-url]
+
+**Goal:** Create new, predictive features and to experiment with various machine learning models to find the best performer.
+
+1. Feature Engineering (TDD):
     - Write Test (`tests/features/test_build_features.py`): Create a test to check the feature creation logic.
     - Write Code (`src/features/build_features.py`): Implement the `create_new_features` function using PySpark to pass the test. This script will be the **2nd task** in our pipeline.
 
-5. Model Training and Prototyping (Notebook):
+2. Model Training and Prototyping (Notebook):
     - Create a new notebook (`notebooks/02_model_prototyping.ipynb`) to find the best model.
     - Train multiple models: Logistic Regression, Random Forest, XGBoost.
     - Evaluate them: Using metrics like AUC, Precision, and Recall.
     - Apply class weighting, resampling (SMOTE) to handle class imbalance.
     - Select the best model: find its best hyperparameters.
 
-## Phase 3: Building the Airflow DAG
+## Phase 5: Productionalizing the MLOps Pipeline ![icon-url]
 
-**Goal:** Orchestrate the tested scripts into an automated pipeline.
+**Goal:** Translate the findings from the notebooks into a final, automated, end-to-end training pipeline orchestrated by Airflow.
 
-
-## Phase 4: Model Training & Deployment
-
-**Goal:** Integrate the model training into the pipeline and prepare for deployment.
+- Create Production Training Script: Developed a clean, non-interactive Python script (`src/models/train_model.py`) that encapsulates the entire process of loading the featured data, defining the preprocessing and SMOTE pipeline, and training the final Random Forest model on all available data.
+- Save Model Artifact: The script saves the final, trained pipeline object (including the preprocessor, SMOTE step, and model) as a single .joblib file in the `models/` directory.
+- Build the **Airflow DAG**: Created a final Airflow DAG (`dags/credit_approval_full_pipeline.py`) that orchestrates the three main scripts: `make_dataset.py`, `build_features.py`, `train_model.py`.
+- Isolate Dependencies: Used the `PythonVirtualenvOperator` to ensure each task runs in a clean, isolated, and reproducible Python environment, demonstrating a best practice for production DAGs.
 
 [icon-url]: https://github.com/ava-ly/credit-approval/blob/main/icon/ok-24.png?raw=true
