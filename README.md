@@ -86,23 +86,25 @@ credit-approval/
 
 2. Data Merging and Cleaning (TDD):
     - Write Test: In the same test file, add a test for the main data processing function. It should check that the application and credit data are merged correctly and that known data anomalies (e.g., `DAYS_EMPLOYED`) are handled.
-    - Write Code: Implement the logic in `src/data/make_dataset.py` to pass the test. This script will be the first major task in our Airflow pipeline.
+    - Write Code: Implement the logic in `src/data/make_dataset.py` to pass the test. This script will be the **1st major task** in our Airflow pipeline.
 
 3. Exploratory Data Analysis (Notebook):
+    - Create a new notebook (`notebooks/01_credit_risk_analysis.ipynb`)
     - Load the Data: Use PySpark to read `../data/processed/primary_dataset`.
     - Analyze Target Variable: Plot the distribution of `Risk_Flag`.
     - Univariate Analysis: Explore single features.
     - Bivariate Analysis: Explore the relationship between each feature and the `Risk_Flag`.
 
 4. Feature Engineering (TDD):
-    - Write Test (`tests/features/test_build_features.py`): Create a test to check the feature creation logic. For example, `test_age_creation` should assert that a `-DAYS_BIRTH` of -7300 results in an `AGE` of 20.
-    - Write Code (`src/features/build_features.py`): Implement the `create_new_features` function using PySpark to pass the test. This script will be the second task in our pipeline.
+    - Write Test (`tests/features/test_build_features.py`): Create a test to check the feature creation logic.
+    - Write Code (`src/features/build_features.py`): Implement the `create_new_features` function using PySpark to pass the test. This script will be the **2nd task** in our pipeline.
 
 5. Model Training and Prototyping (Notebook):
-    - Create a new notebook (`notebooks/02-model-development.ipynb`) to find the best model.
+    - Create a new notebook (`notebooks/02_model_prototyping.ipynb`) to find the best model.
     - Train multiple models: Logistic Regression, Random Forest, XGBoost.
     - Evaluate them: Using metrics like AUC, Precision, and Recall.
-    - Select the best model: And find its best hyperparameters.
+    - Apply class weighting, resampling (SMOTE) to handle class imbalance.
+    - Select the best model: find its best hyperparameters.
 
 ## Phase 3: Building the Airflow DAG
 

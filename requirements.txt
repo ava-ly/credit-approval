@@ -1,9 +1,15 @@
 # Data Manipulation and ML
 pandas
 numpy
+matplotlib
+seaborn
 scikit-learn
+imbalanced-learn
 pyspark==3.5.0
 py4j==0.10.9.7
+pyarrow
+xgboost
+joblib
 
 # Testing
 pytest
