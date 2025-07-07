@@ -1,31 +1,62 @@
-from __future__ import annotations
-
 import pendulum
+from airflow.decorators import dag, task
 
-from airflow.models.dag import DAG
-from airflow.operators.bash import BashOperator # type: ignore
+from src.data.make_dataset import run_dataset_creation
+from src.features.build_features import run_feature_engineering
+from src.models.train_model import train_and_save_model
 
-# This is the main definition of your workflow
-with DAG(
-    dag_id="hello_world_dag",                                 # The name of the DAG in the UI
-    start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),       # A start date in the past
-    catchup=False,                                            # If true, it would run for every day since the start_date
-    schedule=None,                                            # This DAG runs only when manually triggered
-    tags=["project_setup_test"],                              # Helps organize DAGs in the UI
-) as dag:
+# Define the requirements once and reuse them
+VENV_REQUIREMENTS = ['pandas', 'scikit-learn', 'pyspark', 'xgboost', 'imbalanced-learn', 'pyarrow', 'joblib']
+
+@dag(
+    dag_id="credit_approval_taskflow_pipeline",
+    start_date=pendulum.datetime(2023, 1, 1, tz="UTC"),
+    schedule="@daily",
+    catchup=False,
+    tags=["production", "mlops", "taskflow"],
+    doc_md="""
+    ### End-to-End Credit Risk Model Training Pipeline (TaskFlow API)
+    A modern DAG using decorators to automate the ML model creation process.
+    """
+)
+
+def credit_approval_pipeline():
+    """Defines the DAG's structure and tasks."""
+
+    @task.virtualenv(
+        task_id="make_dataset",
+        requirements=VENV_REQUIREMENTS,
+        system_site_packages=False
+    )
+    def make_dataset_task():
+        """Runs the initial data processing."""
+        output_path = run_dataset_creation()
+        return output_path
     
-    # This is your first task. It runs a simple shell command.
-    task1 = BashOperator(
-        task_id="say_hello",                                  # The name of the task
-        bash_command="echo 'Hello from Airflow! My project setup is working.'",
+    @task.virtualenv(
+        task_id="build_features",
+        requirements=VENV_REQUIREMENTS,
+        system_site_packages=False
     )
-
-    # This is your second task.
-    task2 = BashOperator(
-        task_id="show_current_directory",
-        bash_command="echo 'I am running in this directory:' && pwd",
+    def build_features_task(processed_data_path: str):
+        """Runs feature engineering."""
+        output_path = run_feature_engineering()
+        return output_path
+    
+    @task.virtualenv(
+        task_id="train_model",
+        requirements=VENV_REQUIREMENTS,
+        system_site_packages=False
     )
+    def train_model_task(featured_data_path: str):
+        """Trains the final model."""
+        train_and_save_model()
+        print(f"Model training and saving complete.")
 
-    # This line defines the dependency.
-    # It tells Airflow that task1 must complete successfully before task2 can start.
-    task1 >> task2
+    # Define the workflow by calling the functions
+    processed_path = make_dataset_task()
+    featured_path = build_features_task(processed_data_path=processed_path)
+    train_model_task(featured_data_path=featured_path)
+
+# Instantiates the DAG
+credit_approval_pipeline()

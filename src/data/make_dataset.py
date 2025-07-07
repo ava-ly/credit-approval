@@ -1,44 +1,77 @@
-import os
-from pyspark.sql import SparkSession, DataFrame, functions as F
+from pyspark.sql import SparkSession, DataFrame, Window, functions as F
+from pyspark.sql.types import StructType, StructField, IntegerType
 
-def configure_spark() -> SparkSession:
-    """Initialize Spark with optimized settings"""
-    return SparkSession.builder \
-        .appName("CreditRiskAnalysis") \
-        .config("spark.sql.execution.arrow.pyspark.enabled", "true") \
-        .config("spark.sql.parquet.compression.codec", "snappy") \
-        .getOrCreate()
-
+# CORE LOGIC FUNCTIONS (tested by pytest)
 def generate_target_variable(spark: SparkSession, credit_df: DataFrame) -> DataFrame:
-    """Identify high-risk clients"""
-    return (
-        credit_df
-        .withColumn("STATUS", F.coalesce(F.col("STATUS").cast("string"), F.lit("0")))
-        .withColumn("is_high_risk", F.when(F.col("STATUS").isin(["2", "3", "4", "5"]), 1).otherwise(0))
-        .groupBy("ID")
-        .agg(F.max("is_high_risk").alias("Risk_Flag"))
+    """
+    Identify high-risk clients
+    
+    Args:
+        spark: The active SparkSession
+        credit_df: DataFrame containing credit records
+
+    Returns:
+        A Spark DataFrame with two columns: 'ID', 'Risk_Flag'
+    """
+    high_risk_statuses = ['2', '3', '4', '5']
+
+    df_risk_record = credit_df.withColumn(
+        'is_high_risk',
+        F.when(F.col('STATUS').isin(high_risk_statuses), 1).otherwise(0)
     )
+
+    window_spec = Window.partitionBy('ID')
+
+    df_risk_flag = df_risk_record.withColumn(
+        'Risk_Flag',
+        F.max('is_high_risk').over(window_spec)
+    )
+
+    intermediate_df = df_risk_flag.select('ID', 'Risk_Flag').distinct()
+
+    final_schema = StructType([
+        StructField('ID', IntegerType(), True),
+        StructField('Risk_Flag', IntegerType(), False)
+    ])
+
+    final_df = spark.createDataFrame(
+        intermediate_df.rdd,
+        schema=final_schema
+    )
+
+    return final_df
 
 def process_full_dataset(spark: SparkSession, app_df: DataFrame, credit_df: DataFrame) -> DataFrame:
     """Join application data with risk flags"""
     target_df = generate_target_variable(spark, credit_df)
-    return app_df.join(target_df, on="ID", how="inner")
+    processed_df = app_df.join(target_df, on="ID", how="inner")
+    return processed_df
 
-if __name__ == "__main__":
-    spark = configure_spark()
+# MAIN FUNCTION (called by Airflow)
+def run_dataset_creation() -> str:
+    """
+    Initializes Spark, loads data, processes it and save the output.
+
+    Returns:
+        The path to the output directory.
+    """
+    spark = SparkSession.builder.appName("CreditApprovalDataProcessing").getOrCreate()
     
-    try:
-        app_df = spark.read.csv("data/raw/application_record.csv", header=True, inferSchema=True)
-        credit_df = spark.read.csv("data/raw/credit_record.csv", header=True, inferSchema=True)
-        
-        process_full_dataset(spark, app_df, credit_df) \
-            .repartition(50) \
-            .write \
-            .mode("overwrite") \
-            .parquet("data/processed/primary_dataset")
-            
-        print("Success! Output saved to data/processed/primary_dataset")
-    except Exception as e:
-        print(f"Error: {str(e)}")
-    finally:
-        spark.stop()
+    APP_DATA_PATH = "data/raw/application_record.csv"
+    CREDIT_DATA_PATH = "data/raw/credit_record.csv"
+    OUTPUT_PATH = "data/processed/primary_dataset"
+
+    app_record_df = spark.read.csv(APP_DATA_PATH, header=True, inferSchema=True)
+    credit_record_df = spark.read.csv(CREDIT_DATA_PATH, header=True, inferSchema=True)
+
+    final_df = process_full_dataset(spark, app_record_df, credit_record_df)
+
+    final_df.write.mode('overwrite').parquet(OUTPUT_PATH)
+
+    print("--- (Make Dataset): Data processing complete. ---")
+    spark.stop()
+
+    return OUTPUT_PATH
+
+if __name__ == '__main__':
+    run_dataset_creation()

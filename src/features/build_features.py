@@ -1,6 +1,6 @@
-from pyspark.sql import DataFrame, SparkSession
-from pyspark.sql import functions as F
+from pyspark.sql import DataFrame, SparkSession, functions as F
 
+# CORE LOGIC FUNCTION (tested by pytest)
 def create_features(df: DataFrame) -> DataFrame:
     """
     Creates new features based on EDA findings
@@ -22,20 +22,29 @@ def create_features(df: DataFrame) -> DataFrame:
     )
     return featured_df
 
-if __name__ == '__main__':
+# MAIN FUNCTION (called by Airflow)
+def run_feature_engineering() -> str:
+    """
+    Main function to run the feature engineering process.
+
+    Returns:
+        The path to the output directory.
+    """
     spark = SparkSession.builder.appName("FeatureEngineering").getOrCreate()
 
     PROCESSED_DATA_PATH = "data/processed/primary_dataset"
-    FEATURED_DATA_PATH = "data/processed/featured_dataset"
+    FEATURE_DATA_PATH = "data/processed/featured_dataset"
 
-    print(f"Loading data from {PROCESSED_DATA_PATH}")
     primary_df = spark.read.parquet(PROCESSED_DATA_PATH)
 
-    print("Creating new features...")
     featured_df = create_features(primary_df)
 
-    print(f"Saving featured data to {FEATURED_DATA_PATH}")
-    featured_df.write.mode("overwrite").parquet(FEATURED_DATA_PATH)
+    featured_df.write.mode("overwrite").parquet(FEATURE_DATA_PATH)
 
-    print("Feature engineering complete.")
+    print("--- (Build Features): Feature engineering complete. ---")
     spark.stop()
+
+    return FEATURE_DATA_PATH
+
+if __name__ == '__main__':
+    run_feature_engineering()

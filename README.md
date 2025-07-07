@@ -89,7 +89,7 @@ credit-approval/
 
 ## Phase 4: Feature Engineering & Model Prototyping ![icon-url]
 
-**Goal:** Create new, predictive features and to experiment with various machine learning models to find the best performer.
+**Goal:** Create new, predictive features and experiment with various machine learning models to find the best performer.
 
 1. Feature Engineering (TDD):
     - Write Test (`tests/features/test_build_features.py`): Create a test to check the feature creation logic.
@@ -102,9 +102,9 @@ credit-approval/
     - Apply class weighting, resampling (SMOTE) to handle class imbalance.
     - Select the best model: find its best hyperparameters.
 
-## Phase 5: Productionalizing the MLOps Pipeline ![icon-url]
+## Phase 5: Productionalizing the MLOps Pipeline
 
-**Goal:** Translate the findings from the notebooks into a final, automated, end-to-end training pipeline orchestrated by Airflow.
+**Goal:** Translate the findings from the notebooks into an automated, end-to-end training pipeline orchestrated by Airflow.
 
 - Create Production Training Script: Developed a clean, non-interactive Python script (`src/models/train_model.py`) that encapsulates the entire process of loading the featured data, defining the preprocessing and SMOTE pipeline, and training the final Random Forest model on all available data.
 - Save Model Artifact: The script saves the final, trained pipeline object (including the preprocessor, SMOTE step, and model) as a single .joblib file in the `models/` directory.
