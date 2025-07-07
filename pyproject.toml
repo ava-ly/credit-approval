@@ -14,3 +14,14 @@ exclude_lines = [
     "pragma: no cover",
     "if __name__ == .__main__.:"
 ]
+
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "credit-approval"
+version = "0.1"
+description = "Credit Risk Model Training"
+readme = "README.md"
+requires-python = ">=3.8"

@@ -23,7 +23,7 @@ def create_features(df: DataFrame) -> DataFrame:
     return featured_df
 
 # MAIN FUNCTION (called by Airflow)
-def run_feature_engineering() -> str:
+def run_feature_engineering(input_path: str, output_path: str) -> str:
     """
     Main function to run the feature engineering process.
 
@@ -32,19 +32,19 @@ def run_feature_engineering() -> str:
     """
     spark = SparkSession.builder.appName("FeatureEngineering").getOrCreate()
 
-    PROCESSED_DATA_PATH = "data/processed/primary_dataset"
-    FEATURE_DATA_PATH = "data/processed/featured_dataset"
+    input_path = "data/processed/primary_dataset"
+    output_path = "data/processed/featured_dataset"
 
-    primary_df = spark.read.parquet(PROCESSED_DATA_PATH)
+    primary_df = spark.read.parquet(input_path)
 
     featured_df = create_features(primary_df)
 
-    featured_df.write.mode("overwrite").parquet(FEATURE_DATA_PATH)
+    featured_df.write.mode("overwrite").parquet(output_path)
 
     print("--- (Build Features): Feature engineering complete. ---")
     spark.stop()
 
-    return FEATURE_DATA_PATH
+    return output_path
 
 if __name__ == '__main__':
     run_feature_engineering()
