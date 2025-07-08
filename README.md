@@ -2,6 +2,7 @@
 <!-- Badges Section -->
 <p>
     <img src="https://github.com/ava-ly/credit-approval/actions/workflows/main.yml/badge.svg" alt="Build Status">
+    <img src="https://img.shields.io/badge/MLOps_Docker-Airflow_2.8.1_|_PySpark_3.5-0073C6?logo=docker&logoColor=white" alt="Container">
     <img src="https://codecov.io/github/ava-ly/credit-approval/graph/badge.svg?token=70U95XEZJ7" alt="Code Coverage">
 </p>
 
@@ -109,6 +110,6 @@ credit-approval/
 - Create Production Training Script: Developed a clean, non-interactive Python script (`src/models/train_model.py`) that encapsulates the entire process of loading the featured data, defining the preprocessing and SMOTE pipeline, and training the final Random Forest model on all available data.
 - Save Model Artifact: The script saves the final, trained pipeline object (including the preprocessor, SMOTE step, and model) as a single .joblib file in the `models/` directory.
 - Build the **Airflow DAG**: Created a final Airflow DAG (`dags/credit_approval_full_pipeline.py`) that orchestrates the three main scripts: `make_dataset.py`, `build_features.py`, `train_model.py`.
-- Isolate Dependencies: Used the `PythonVirtualenvOperator` to ensure each task runs in a clean, isolated, and reproducible Python environment, demonstrating a best practice for production DAGs.
+
 
 [icon-url]: https://github.com/ava-ly/credit-approval/blob/main/icon/ok-24.png?raw=true
