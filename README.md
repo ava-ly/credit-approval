@@ -3,7 +3,9 @@
 <p>
     <img src="https://github.com/ava-ly/credit-approval/actions/workflows/main.yml/badge.svg" alt="Build Status">
     <img src="https://img.shields.io/badge/MLOps_Docker-Airflow_2.8.1_|_PySpark_3.5-0073C6?logo=docker&logoColor=white" alt="Container">
-    <img src="https://codecov.io/github/ava-ly/credit-approval/graph/badge.svg?token=70U95XEZJ7" alt="Code Coverage">
+    <a href="https://codecov.io/gh/ava-ly/credit-approval" >
+        <img src="https://codecov.io/gh/ava-ly/credit-approval/graph/badge.svg?token=70U95XEZJ7" alt="Code Coverage">
+    </a>
 </p>
 
 ## Project Structure
