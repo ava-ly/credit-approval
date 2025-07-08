@@ -1,7 +1,8 @@
 import pytest
 from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
-from src.data.make_dataset import generate_target_variable, process_full_dataset
+from unittest.mock import patch, MagicMock
+from src.data.make_dataset import generate_target_variable, process_full_dataset, run_dataset_creation
 
 @pytest.fixture(scope="session")
 def spark():
@@ -9,6 +10,11 @@ def spark():
         .master("local[2]") \
         .appName("pytest-spark-testing") \
         .getOrCreate()
+
+def mock_spark():
+    spark = MagicMock()
+    spark.read.csv.return_value = MagicMock()
+    return spark
 
 def test_target_variable_generation(spark):
     """Test risk flag generation logic"""
@@ -55,3 +61,21 @@ def test_full_dataset_processing(spark):
     expected_data = [(101, 'F', 0), (102, 'M', 1)]
     actual_data = [(row.ID, row.CODE_GENDER, row.Risk_Flag) for row in processed_df.collect()]
     assert sorted(actual_data) == sorted(expected_data)
+
+def test_run_dataset_creation(mock_spark_builder):
+    with patch(
+        'pyspark.sql.SparkSession.builder',
+        new=mock_spark_builder
+    ):
+        output_path = run_dataset_creation()
+        
+        # Verify builder pattern was called correctly
+        mock_spark_builder.appName.assert_called_once_with("CreditApprovalDataProcessing")
+        mock_spark_builder.getOrCreate.assert_called_once()
+        
+        # Verify Spark interactions
+        mock_spark = mock_spark_builder.getOrCreate.return_value
+        mock_spark.read.csv.assert_called()
+        mock_spark.stop.assert_called_once()
+        
+        assert output_path == "data/processed/primary_dataset"
