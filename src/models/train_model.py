@@ -9,7 +9,7 @@ from imblearn.pipeline import Pipeline as ImbPipeline
 from imblearn.over_sampling import SMOTE
 
 # Define file paths
-FEATURED_DATA_PATH = Path("data/processed/featured_dataset.parquet")
+FEATURED_DATA_PATH = Path("s3a://credit-approval-data/processed/featured_dataset.parquet")
 FINAL_MODEL_PATH = "models/credit_risk_pipeline_final.joblib"
 
 def train_and_save_model():
@@ -17,8 +17,13 @@ def train_and_save_model():
     This function loads the latest featured data, 
     trains the pipeline and saves the result.
     """
-    # Load the data
-    df = pd.read_parquet(FEATURED_DATA_PATH)
+    storage_options = {
+        "key": "test",
+        "secret": "test",
+        "client_kwargs": {"endpoint_url": "http://localstack:4566"}
+    }
+    print(f"Loading featured data from: {FEATURED_DATA_PATH}")
+    df = pd.read_parquet(FEATURED_DATA_PATH, storage_options=storage_options)
     print('Data loaded successfully.')
 
     # Define the target and features

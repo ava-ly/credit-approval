@@ -23,14 +23,27 @@ def create_features(df: DataFrame) -> DataFrame:
     return featured_df
 
 # MAIN FUNCTION (called by Airflow)
-def run_feature_engineering(input_path: str = "data/processed/primary_dataset", output_path: str = "data/processed/featured_dataset") -> str:
+def run_feature_engineering(
+    input_path: str = "s3a://credit-approval-data/processed/primary_dataset", 
+    output_path: str = "s3a://credit-approval-data/processed/featured_dataset"
+    ) -> str:
     """
     Main function to run the feature engineering process.
 
     Returns:
         The path to the output directory.
     """
-    spark = SparkSession.builder.appName("FeatureEngineering").getOrCreate()
+    spark = (
+        SparkSession.builder
+        .appName("FeatureEngineering")
+        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262")
+        .config("spark.hadoop.fs.s3a.endpoint", "http://localstack:4566")
+        .config("spark.hadoop.fs.s3a.path.style.access", "true")
+        .config("spark.hadoop.fs.s3a.access.key", "test")
+        .config("spark.hadoop.fs.s3a.secret.key", "test")
+        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+        .getOrCreate()
+    )
 
     primary_df = spark.read.parquet(input_path)
 

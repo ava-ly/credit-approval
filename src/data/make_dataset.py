@@ -55,11 +55,21 @@ def run_dataset_creation() -> str:
     Returns:
         The path to the output directory.
     """
-    spark = SparkSession.builder.appName("CreditApprovalDataProcessing").getOrCreate()
+    spark = (
+        SparkSession.builder
+        .appName("CreditApprovalDataProcessing")
+        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262") # Download necessary JARs
+        .config("spark.hadoop.fs.s3a.endpoint", "http://localstack:4566") # Point to LocalStack
+        .config("spark.hadoop.fs.s3a.path.style.access", "true")
+        .config("spark.hadoop.fs.s3a.access.key", "test") # Dummy credentials for LocalStack
+        .config("spark.hadoop.fs.s3a.secret.key", "test")
+        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+        .getOrCreate()
+    )
     
-    APP_DATA_PATH = "data/raw/application_record.csv"
-    CREDIT_DATA_PATH = "data/raw/credit_record.csv"
-    OUTPUT_PATH = "data/processed/primary_dataset"
+    APP_DATA_PATH = "s3a://credit-approval-data/raw/application_record.csv"
+    CREDIT_DATA_PATH = "s3a://credit-approval-data/raw/credit_record.csv"
+    OUTPUT_PATH = "s3a://credit-approval-data/processed/primary_dataset"
 
     app_record_df = spark.read.csv(APP_DATA_PATH, header=True, inferSchema=True)
     credit_record_df = spark.read.csv(CREDIT_DATA_PATH, header=True, inferSchema=True)
