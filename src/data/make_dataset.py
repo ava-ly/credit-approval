@@ -48,40 +48,42 @@ def process_full_dataset(spark: SparkSession, app_df: DataFrame, credit_df: Data
     return processed_df
 
 # MAIN FUNCTION (called by Airflow)
-def run_dataset_creation() -> str:
+def run_dataset_creation(spark: SparkSession, app_path: str, credit_path: str, output_path: str) -> str:
     """
-    Initializes Spark, loads data, processes it and save the output.
+    Main function to run the full dataset creation process.
+    It takes a SparkSession and paths as input.
+    """
+    print(f"---(Make Dataset): Loading raw data from {app_path} and {credit_path}...")
+    application_df = spark.read.csv(app_path, header=True, inferSchema=True)
+    credit_record_df = spark.read.csv(credit_path, header=True, inferSchema=True)
+    
+    print("---(Make Dataset): Processing full dataset...")
+    final_df = process_full_dataset(spark, application_df, credit_record_df)
+    
+    print(f"---(Make Dataset): Saving processed data to {output_path}...")
+    final_df.write.mode("overwrite").parquet(output_path)
+    
+    print("---(Make Dataset): Data processing complete.---")
+    return output_path
 
-    Returns:
-        The path to the output directory.
-    """
+# --- The executable block now handles configuration and calls the logic ---
+if __name__ == '__main__':
+    # S3A configuration is now centralized here in the entrypoint
     spark = (
         SparkSession.builder
         .appName("CreditApprovalDataProcessing")
-        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262") # Download necessary JARs
-        .config("spark.hadoop.fs.s3a.endpoint", "http://localstack:4566") # Point to LocalStack
+        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262")
+        .config("spark.hadoop.fs.s3a.endpoint", "http://localstack:4566")
         .config("spark.hadoop.fs.s3a.path.style.access", "true")
-        .config("spark.hadoop.fs.s3a.access.key", "test") # Dummy credentials for LocalStack
+        .config("spark.hadoop.fs.s3a.access.key", "test")
         .config("spark.hadoop.fs.s3a.secret.key", "test")
-        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
         .getOrCreate()
     )
     
     APP_DATA_PATH = "s3a://credit-approval-data/raw/application_record.csv"
     CREDIT_DATA_PATH = "s3a://credit-approval-data/raw/credit_record.csv"
     OUTPUT_PATH = "s3a://credit-approval-data/processed/primary_dataset"
-
-    app_record_df = spark.read.csv(APP_DATA_PATH, header=True, inferSchema=True)
-    credit_record_df = spark.read.csv(CREDIT_DATA_PATH, header=True, inferSchema=True)
-
-    final_df = process_full_dataset(spark, app_record_df, credit_record_df)
-
-    final_df.write.mode('overwrite').parquet(OUTPUT_PATH)
-
-    print("--- (Make Dataset): Data processing complete. ---")
+    
+    run_dataset_creation(spark, APP_DATA_PATH, CREDIT_DATA_PATH, OUTPUT_PATH)
+    
     spark.stop()
-
-    return OUTPUT_PATH
-
-if __name__ == '__main__':
-    run_dataset_creation()

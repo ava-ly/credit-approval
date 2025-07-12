@@ -1,5 +1,14 @@
 import pytest
 from unittest.mock import MagicMock
+from pyspark.sql import SparkSession
+
+@pytest.fixture(scope="session")
+def spark():
+    """Create a SparkSession for unit testing core logic."""
+    return SparkSession.builder \
+        .master("local[2]") \
+        .appName("pytest-spark-unit-testing") \
+        .getOrCreate()
 
 @pytest.fixture
 def mock_spark_builder():

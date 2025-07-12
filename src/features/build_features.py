@@ -4,13 +4,13 @@ from pyspark.sql import DataFrame, SparkSession, functions as F
 def create_features(df: DataFrame) -> DataFrame:
     """
     Creates new features based on EDA findings
-    - AGE: age of applicants in years.
+    - AGE_YEARS: age of applicants in years.
     - YEARS_EMPLOYED: Years of employment.
     - IS_UNEMPLOYED: binary flag for employment.
     - INCOME_PER_PERSON: Income per family member.
     """
     featured_df = (
-        df.withColumn("AGE", -F.col("DAYS_BIRTH") / 365.0)
+        df.withColumn("AGE_YEARS", -F.col("DAYS_BIRTH") / 365.0)
             .withColumn("IS_UNEMPLOYED", 
                         F.when(F.col("DAYS_EMPLOYED") > 0, 1)
                         .otherwise(0))
@@ -23,16 +23,22 @@ def create_features(df: DataFrame) -> DataFrame:
     return featured_df
 
 # MAIN FUNCTION (called by Airflow)
-def run_feature_engineering(
-    input_path: str = "s3a://credit-approval-data/processed/primary_dataset", 
-    output_path: str = "s3a://credit-approval-data/processed/featured_dataset"
-    ) -> str:
-    """
-    Main function to run the feature engineering process.
+def run_feature_engineering(spark: SparkSession, input_path: str, output_path: str) -> str:
+    """Main function to run the feature engineering process."""
+    print(f"---(Build Features): Loading data from {input_path}...")
+    primary_df = spark.read.parquet(input_path)
+    
+    print("---(Build Features): Creating new features...")
+    featured_df = create_features(primary_df)
+    
+    print(f"---(Build Features): Saving featured data to {output_path}...")
+    featured_df.write.mode("overwrite").parquet(output_path)
+    
+    print("---(Build Features): Feature engineering complete.---")
+    return output_path
 
-    Returns:
-        The path to the output directory.
-    """
+# --- The executable block now handles configuration ---
+if __name__ == '__main__':
     spark = (
         SparkSession.builder
         .appName("FeatureEngineering")
@@ -41,20 +47,12 @@ def run_feature_engineering(
         .config("spark.hadoop.fs.s3a.path.style.access", "true")
         .config("spark.hadoop.fs.s3a.access.key", "test")
         .config("spark.hadoop.fs.s3a.secret.key", "test")
-        .config("spark.hadoop.fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
         .getOrCreate()
     )
+    
+    PROCESSED_DATA_PATH = "s3a://credit-approval-data/processed/primary_dataset"
+    FEATURE_DATA_PATH = "s3a://credit-approval-data/processed/featured_dataset"
 
-    primary_df = spark.read.parquet(input_path)
-
-    featured_df = create_features(primary_df)
-
-    featured_df.write.mode("overwrite").parquet(output_path)
-
-    print("--- (Build Features): Feature engineering complete. ---")
+    run_feature_engineering(spark, PROCESSED_DATA_PATH, FEATURE_DATA_PATH)
+    
     spark.stop()
-
-    return output_path
-
-if __name__ == '__main__':
-    run_feature_engineering()
